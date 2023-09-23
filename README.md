@@ -15,7 +15,7 @@
 1. **Clone the Repository**
 
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:AbhinaySingh6324/CosmoCrud.git
    cd fastapi-mongodb-project
    ```
 2. **Install the requirements dependency in the system.**
