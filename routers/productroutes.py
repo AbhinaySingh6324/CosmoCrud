@@ -45,30 +45,39 @@ async def create_order(order: Order):
     for item in order.items:
         product_id = item.product_id
         try:
-            product_id = ObjectId(product_id)  # Convert the product_id to ObjectId
+            product_id = ObjectId(product_id)                                          # Convert the product_id to ObjectId
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid product ID: {product_id}")
 
         product = products_collection.find_one({"_id": product_id})
         if not product:
             error_message = f"Product with ID {product_id} does not exist."
-            print(error_message)  # Print the error for debugging
+            print(error_message)                                                       # Print the error for debugging
             raise HTTPException(status_code=400, detail=error_message)
 
-    # Generate a new ObjectId to use as the order ID
+                                                                                       # Checking if product quantity is sufficient
+        if item.bought_quantity > product['available_quantity']:
+            error_message = f"Insufficient quantity for product with ID {product_id}. Available quantity: {product['available_quantity']}"
+            print(error_message)                                                         # Print the error for debugging
+            raise HTTPException(status_code=400, detail=error_message)
+
+                                                                                         # Update the product quantity in the collection
+        new_quantity = product['available_quantity'] - item.bought_quantity
+        products_collection.update_one({"_id": product_id}, {"$set": {"available_quantity": new_quantity}})
+
+                                                                                            # Generate a new ObjectId to use as the order ID
     order_id = ObjectId()
 
-    # Add the order_id to the order data dictionary
+                                                                                              # Add the order_id to the order data dictionary
     order_dict = serialize_order(order)
     order_dict["_id"] = order_id
 
-    # Insert the order data into the orders collection
+                                                         # Insert the order data into the orders collection
     orders_collection.insert_one(order_dict)
 
-    # Return the order ID as a response
+                                                         # Return the order ID as a response
     return {"order_id": str(order_id)}
-
-# Fetch all orders with pagination
+# Fetching all orders with pagination
 @router.get("/orders/")
 async def list_orders(limit: int = Query(10, description="Number of orders per page"), offset: int = Query(0, description="Page number")):
     orders = list(orders_collection.find({}, {"_id": 0}).skip(offset * limit).limit(limit))
