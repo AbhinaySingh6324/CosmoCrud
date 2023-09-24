@@ -108,6 +108,6 @@
 - schemas/productserializer.py: Define data serialization and deserialization functions.
 - routers/productroutes.py: Define API routes and endpoints.
 - requirements.txt: List of Python packages required for the project.
-- data: Directory containing sample data (products.json).
+- data: Some sample data is already populated  in the collection on the configured cluster.
 - README.md: This README file.
    
