@@ -65,35 +65,35 @@ async def create_order(order: Order):
         product = products_collection.find_one({"_id": product_id})
         if not product:
             error_message = f"Product with ID {product_id} does not exist."
-            print(error_message)  # Print the error for debugging
+            print(error_message)  #  debugging purpose
             raise HTTPException(status_code=400, detail=error_message)
 
         # Check if product quantity is sufficient
         if item.bought_quantity > product['available_quantity']:
             error_message = f"Insufficient quantity for product with ID {product_id}. Available quantity: {product['available_quantity']}"
-            print(error_message)  # Print the error for debugging
+            print(error_message)  # debugging
             raise HTTPException(status_code=400, detail=error_message)
 
         # Update the product quantity in the collection
         new_quantity = product['available_quantity'] - item.bought_quantity
         products_collection.update_one({"_id": product_id}, {"$set": {"available_quantity": new_quantity}})
 
-        # Calculate the price for the current item and add it to the total price
+                                                               # Calculating the price for the current item and add it to the total price
         item_price = product['product_price'] * item.bought_quantity
         total_price += item_price
 
-    # Generate a new ObjectId to use as the order ID
+                                                                 # Generate a new ObjectId to use as the order ID
     order_id = ObjectId()
 
-    # Add the order_id and total_price to the order data dictionary
+                                                                # Add the order_id and total_price to the order data dictionary
     order_dict = serialize_order(order)
     order_dict["_id"] = order_id
     order_dict["total_price"] = total_price
 
-    # Insert the order data into the orders collection
+                                                                  # Insert the order data into the orders collection
     orders_collection.insert_one(order_dict)
 
-    # Return the order ID and total price as a response
+                                                                     # Return the order ID and total price as a response
     return {"order_id": str(order_id), "total_price": total_price}
 # Fetching all orders with pagination
 @router.get("/orders/")
@@ -120,12 +120,12 @@ async def get_order(order_id: str):
 @router.put("/products/{product_id}")
 async def update_product(product_id: str, available_quantity: int):
     try:
-        bson_product_id = ObjectId(product_id)
+        prod_id = ObjectId(product_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid product ID: {product_id}")
 
     result = products_collection.update_one(
-        {"_id": bson_product_id},
+        {"_id": prod_id},
         {"$set": {"available_quantity": available_quantity}}
     )
     if result.modified_count == 0:
@@ -158,17 +158,35 @@ async def list_order_ids():
 @router.delete("/orders/{order_id}")
 async def delete_order(order_id: str = Path(..., description="The ID of the order to delete")):
     try:
-        bson_order_id = ObjectId(order_id)
+        order_id = ObjectId(order_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid order ID: {order_id}")
 
-    # Check if the order exists
-    existing_order = orders_collection.find_one({"_id": bson_order_id})
+    # Check if the order exists and retrieve its details
+    existing_order = orders_collection.find_one({"_id": order_id})
     if not existing_order:
         raise HTTPException(status_code=404, detail="Order not found")
 
+    # Retrieve the products from the deleted order
+    deleted_order_items = existing_order.get("items", [])
+
+    # Update the product counts in the products collection
+    for item in deleted_order_items:
+        product_id = item.get("product_id")
+        quantity = item.get("bought_quantity")
+        
+        # Find the product by ID and increment its available quantity
+        product = products_collection.find_one({"_id": ObjectId(product_id)})
+        if product:
+            current_quantity = product.get("available_quantity", 0)
+            new_quantity = current_quantity + quantity
+            products_collection.update_one(
+                {"_id": ObjectId(product_id)},
+                {"$set": {"available_quantity": new_quantity}}
+            )
+
     # Delete the order
-    orders_collection.delete_one({"_id": bson_order_id})
+    orders_collection.delete_one({"_id": order_id})
 
     return {"message": "Order deleted successfully"}
 
