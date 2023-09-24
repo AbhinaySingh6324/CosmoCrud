@@ -102,11 +102,11 @@
 
 ## Project Structure
 
-- main.py: The FastAPI application entry point.
-- config.py: Configuration settings for MongoDB connection.
-- models.py: Define MongoDB data models (Product, User, Order).
-- schemas.py: Define data serialization and deserialization functions.
-- routes.py: Define API routes and endpoints.
+- index.py: The FastAPI application entry point.
+- config/db.py: Configuration settings for MongoDB connection.
+- models/productmodel.py: Define MongoDB data models (Product, User, Order).
+- schemas/productserializer.py: Define data serialization and deserialization functions.
+- routers/productroutes.py: Define API routes and endpoints.
 - requirements.txt: List of Python packages required for the project.
 - data: Directory containing sample data (products.json).
 - README.md: This README file.
