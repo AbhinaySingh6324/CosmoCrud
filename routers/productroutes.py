@@ -133,7 +133,7 @@ async def update_product(product_id: str, available_quantity: int):
     return {"message": "Product updated successfully"}
 
 # Fetching all orders with pagination and returning the cumulative total amount of products for each order
-@router.get("/order-ids/")
+@router.get("/order-ids_and_amount/")
 async def list_order_ids():
     # Retrieve all orders from the database
     orders = list(orders_collection.find({}, {"_id": 1, "items": 1}))

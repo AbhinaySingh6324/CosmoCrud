@@ -72,9 +72,9 @@
    ```
 
   - Updates the available quantity for a product.
-- Fetch Order IDs:
+- Fetch Order IDs along with Total Amount:
   ```bash
-  PUT /products/{product_id}
+  GET /order-ids_and_amount/
   ```
   - Fetches the ObjectId of all orders along with their calculated amount.
 - Delete Orders with Order IDs:
