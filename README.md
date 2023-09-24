@@ -38,28 +38,58 @@
 ## API Endpoints
 
 
-- List All Products: GET /products/
+- List All Products:
+   ```bash
+   GET /products/
+  ```
 
-  -Lists all available products in the system. 
+  - Lists all available products in the system. 
 - Create a New Order: POST /orders/
+   ```bash
+   POST /orders/
+  ```
+  
 
-  -Creates a new order with a unique order ID.
+  - Creates a new order with a unique order ID.
 - Fetch All Orders: GET /orders/
+   ```bash
+   GET /orders/
+  ```
 
-  -Fetches all orders from the system with pagination support.
-- Fetch a Single Order: GET /orders/{order_id}
+  - Fetches all orders from the system with pagination support.
+- Fetch a Single Order:
+   ```bash
+  GET /orders/{order_id}
+   ```
 
-  -Fetches a single order by its order ID.
-- Update Product Quantity: PUT /products/{product_id}
+  - Fetches a single order by its order ID.
+- Update Product Quantity: 
+  ```bash
+  PUT /products/{product_id}
+   ```
 
-  -Updates the available quantity for a product.
-- Fetch Order IDs: GET /order-ids/
+  - Updates the available quantity for a product.
+- Fetch Order IDs:
+  ```bash
+  PUT /products/{product_id}
+  ```
+  - Fetches the ObjectId of all orders along with their calculated amount.
+- Delete Orders with Order IDs:
+  ```bash
+  DELETE /orders/{order_id}
+  ```
+  - If the order exists, it will be deleted, and you will receive a response with the message:
 
-  -Fetches the ObjectId of all orders.
+.
 
 ## Sample Requests
 
-- You can use tools like curl or API client applications (e.g., Postman) to make HTTP requests to the API endpoints.
+- You can use tools like curl or API client applications (e.g., Postman) to make HTTP requests to the API endpoints,FastAPI also provides swagger powered documentation and testing  at this URI once your uvicorn server is up and running.
+
+ ```bash
+  http://127.0.0.1:8000/docs
+  ```
+  
 
 ## Project Structure
 
