@@ -5,6 +5,17 @@ from pymongo import MongoClient
 from models.productmodel import Product, User, OrderItem, UserAddress, Order
 from config.db import MONGODB_URL, DB_NAME
 from schemas.productserializer import deserialize_order, serialize_order, serialize_product
+from httpx import AsyncClient
+order_id_api_url = "http://localhost:8000/orders"  #to be used in api with route orders-with-products (line no.166)
+
+async def get_total_amount(order_id):
+    async with AsyncClient() as client:
+        response = await client.get(f"{order_id_api_url}/{order_id}")
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch total amount")
 
 # Initialize MongoDB client and database
 client = MongoClient(MONGODB_URL)
@@ -160,3 +171,48 @@ async def delete_order(order_id: str = Path(..., description="The ID of the orde
     orders_collection.delete_one({"_id": bson_order_id})
 
     return {"message": "Order deleted successfully"}
+
+@router.get("/orders-with-product-details/")
+async def get_orders_with_product_details():
+    # Define the MongoDB aggregation pipeline
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "products",  # to join with product 
+                "localField": "items.product_id",  # Field from the "orders" 
+                "foreignField": "_id",  # Field from the "products" 
+                "as": "product_details"  # Alias 
+            }
+        # },
+        # {
+        #     "$unwind": {
+        #         "path": "$product_details",
+        #         "preserveNullAndEmptyArrays": True  # Preserve orders even if there are no matching products
+        #     }
+        # },
+        # {
+        #     "$group": {
+        #         "_id": "$_id",  # Group by order ID
+        #         "user": {"$first": "$user"},  # Preserve user information
+        #         "user_address": {"$first": "$user_address"},  # Preserve user address
+        #         "items": {
+        #             "$push": "$items"  # Preserve items array
+        #         },
+        #         "total_amount": {
+        #             "$sum": {
+        #                 "$multiply": ["$product_details.product_price", "$items.boughtQuantity"]
+        #             }  # Calculate total amount for the order
+        #         }
+        #     }
+        }
+    ]
+
+    # Execute the aggregation query
+    result = list(orders_collection.aggregate(pipeline))
+
+    # Convert ObjectId to string in the result
+    for order in result:
+        order["_id"] = str(order["_id"])  # Convert ObjectId to string
+
+    # Return the orders with product details and total amount
+    return result
