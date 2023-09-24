@@ -1,6 +1,6 @@
 # routes.py
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 from pymongo import MongoClient
 from models.productmodel import Product, User, OrderItem, UserAddress, Order
 from config.db import MONGODB_URL, DB_NAME
@@ -121,12 +121,42 @@ async def update_product(product_id: str, available_quantity: int):
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product updated successfully"}
 
+# Fetching all orders with pagination and returning the cumulative total amount of products for each order
 @router.get("/order-ids/")
 async def list_order_ids():
     # Retrieve all orders from the database
-    orders = list(orders_collection.find({}, {"_id": 1}))
+    orders = list(orders_collection.find({}, {"_id": 1, "items": 1}))
 
-    # Extract and return the ObjectId of each order
-    order_ids = [{"order_id":str(order["_id"])} for order in orders]
+    # Calculate the cumulative total amount of products for each order
+    order_ids = []
+    for order in orders:
+        order_id = str(order["_id"])  # Convert ObjectId to string
+
+        # Calculate the cumulative total amount for this order
+        total_amount = 0
+        for item in order["items"]:
+            product_id = item["product_id"]
+            product = products_collection.find_one({"_id": ObjectId(product_id)})
+            if product:
+                total_amount += product["product_price"] * item["bought_quantity"]
+
+        order_ids.append({"order_id": order_id, "total_amount_of_products": total_amount})
 
     return order_ids
+# Delete an order by Order ID
+@router.delete("/orders/{order_id}")
+async def delete_order(order_id: str = Path(..., description="The ID of the order to delete")):
+    try:
+        bson_order_id = ObjectId(order_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid order ID: {order_id}")
+
+    # Check if the order exists
+    existing_order = orders_collection.find_one({"_id": bson_order_id})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    # Delete the order
+    orders_collection.delete_one({"_id": bson_order_id})
+
+    return {"message": "Order deleted successfully"}
