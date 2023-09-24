@@ -16,23 +16,26 @@
 
    ```bash
    git clone git@github.com:AbhinaySingh6324/CosmoCrud.git
-   cd fastapi-mongodb-project
+   cd <Your Cloned Directory Name>
    ```
-2. **Install the requirements dependency in the system.**
-   ```bash
+2. **Create Virtual Enviroment and Install the requirements in the Virtual Enviroment.**
+    ```bash
+    pip install venv
+    python -m venv <nam of virtual env>
+    .<name of env>/Scripts/activate  //for activating env//
     pip install -r requirements.txt
 
-   ```
-3.**Configured MongoDb**
+    ```
+3. **Configured MongoDb**
    
    As mentioned in the assignment i have used mongoDb for thuis task and letting the shared cluster password there for testing purpose.
-   ```bash
+    ```bash
     password: abhinay
    ```
-4.**Run Application**
-  ```bash
-  uvicorn main:app --reload
-  ```
+4. **Run Application**
+   ```bash
+   uvicorn main:app --reload
+   ```
    The FastAPI application should now be running. You can access the API at http://localhost:8000.
 
 ## API Endpoints
