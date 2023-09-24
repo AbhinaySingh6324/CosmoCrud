@@ -1,6 +1,6 @@
 # FastAPI Project with MongoDB 
 
- Instructions for setting up and running a FastAPI project with MongoDB.
+ Instructions for setting up and running a Cosmocrud project with MongoDB.
 
 ## Prerequisites
 
@@ -81,7 +81,13 @@
   ```bash
   DELETE /orders/{order_id}
   ```
-  - If the order exists, it will be deleted, and you will receive a response with the message:
+  - If the order exists, it will be deleted, and you will receive a response with the message.
+
+- Fetch Orders with product details:
+  ```bash
+  GET /orders-with-product-details
+  ```
+  - Mongo aggregation pipeline is used to fetch the orders along with the product details present in them.
 
 .
 
