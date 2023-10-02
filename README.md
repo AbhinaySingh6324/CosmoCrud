@@ -34,7 +34,7 @@
    ```
 4. **Run Application**
    ```bash
-   uvicorn main:app --reload
+   uvicorn index:app --reload
    ```
    The FastAPI application should now be running. You can access the API at http://localhost:8000.
 
